@@ -8,7 +8,7 @@
 public typealias FixFloat = Int64
 
 public extension FixFloat {
-
+    
     static let fractionBits: Int64 = 10
     static let doubleFractionBits: Int64 = fractionBits + fractionBits
     static let cubicFractionBits: Int64 = doubleFractionBits + fractionBits
@@ -21,10 +21,14 @@ public extension FixFloat {
     static let cubicUnit: Int64 = 1 << cubicFractionBits
     static let quarticUnit: Int64 = 1 << quarticFractionBits
     
+    static let pi: FixFloat = 3217
+    
+    @inlinable
     var double: Double {
         Double(self) / Double(Int64.unit)
     }
     
+    @inlinable
     var float: Float {
         Float(self) / Float(Int64.unit)
     }
@@ -38,6 +42,11 @@ public extension FixFloat {
     func mul(_ value: FixFloat) -> FixFloat {
         (self * value) >> FixFloat.fractionBits
     }
+
+    @inlinable
+    var sqr: FixFloat {
+        (self * self) >> FixFloat.fractionBits
+    }
     
     @inlinable
     var sqrt: FixFloat {
@@ -46,13 +55,25 @@ public extension FixFloat {
 }
 
 public extension Double {
+    
+    @inlinable
     var fix: FixFloat {
         Int64(self * Double(FixFloat.unit))
     }
 }
 
 public extension Float {
+    
+    @inlinable
     var fix: FixFloat {
         Int64(self * Float(FixFloat.unit))
+    }
+}
+
+public extension Int {
+    
+    @inlinable
+    var fix: FixFloat {
+        Int64(self << FixFloat.fractionBits)
     }
 }

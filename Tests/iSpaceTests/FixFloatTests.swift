@@ -64,4 +64,5 @@ final class FixFloatTests: XCTestCase {
             a += 1
         }
     }
+
 }
