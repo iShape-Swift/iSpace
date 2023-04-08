@@ -10,7 +10,7 @@ import simd
 public typealias Vec = simd_float2
 
 public extension Vec {
-
+    
     static let zero = Vec(0, 0)
     
     @inlinable
@@ -52,4 +52,33 @@ public extension Vec {
     func crossProduct(_ v: Vec) -> Float { // cross product
         x * v.y - y * v.x
     }
+    
+    @inlinable
+    func isClockWise(_ v: Vec) -> Bool { // cross product
+        x * v.y < y * v.x
+    }
+
+    @inlinable
+    func ortho(clockwise: Bool) -> Vec {
+        if clockwise {
+            return Vec(y, -x).normalize
+        } else {
+            return Vec(-y, x).normalize
+        }
+    }
+}
+
+public extension Array where Element == Vec {
+    
+    @inlinable
+    var fix: [FixVec] {
+        let n = count
+        var array = Array<FixVec>(repeating: .zero, count: n)
+        for i in 0..<n {
+            array[i] = self[i].fix
+        }
+        
+        return array
+    }
+    
 }

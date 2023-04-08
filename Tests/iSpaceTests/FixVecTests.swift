@@ -106,5 +106,59 @@ final class FixVecTests: XCTestCase {
             y += 109
         }
     }
+    
+    private func assert(_ a: Int64, _ b: Int64) {
+        XCTAssertTrue(abs(a - b) < 130, "\(a) != \(b)")
+    }
+    
+    private func assert(_ a: FixVec, _ b: FixVec) {
+        assert(a.x, b.x)
+        assert(a.y, b.y)
+    }
+    
+    private func assertOrto(_ v: Vec, _ m: Vec) {
+        let f = v.fix
+        let n = m.fix
+
+        assert(f.ortho(clockwise: true), n)
+        assert(f.ortho(clockwise: false), n.reverse)
+    }
+    
+    func testOrtho() throws {
+        assertOrto(Vec(0, 1), Vec(1, 0))
+        assertOrto(Vec(0, 10), Vec(1, 0))
+        assertOrto(Vec(0, 100), Vec(1, 0))
+        
+        assertOrto(Vec(0.1, 0.9), Vec(0.9, -0.1).normalize)
+        assertOrto(Vec(1, 9), Vec(0.9, -0.1).normalize)
+        assertOrto(Vec(10, 90), Vec(0.9, -0.1).normalize)
+        
+        assertOrto(Vec(1, 0), Vec(0, -1))
+        assertOrto(Vec(10, 0), Vec(0, -1))
+        assertOrto(Vec(100, 0), Vec(0, -1))
+        
+        assertOrto(Vec(0, -1), Vec(-1, 0))
+        assertOrto(Vec(0, -10), Vec(-1, 0))
+        assertOrto(Vec(0, -100), Vec(-1, 0))
+        
+        assertOrto(Vec(-1, 0), Vec(0, 1))
+        assertOrto(Vec(-10, 0), Vec(0, 1))
+        assertOrto(Vec(-100, 0), Vec(0, 1))
+        
+        var r: Float = 0.01
+        let hp: Float = 0.5 * .pi
+        while r < 2000 {
+            var a: Float = -0.001
+            while a < 2 * .pi {
+                let v = r * Vec(cos(a), sin(a))
+                let n = Vec(cos(a - hp), sin(a - hp))
+
+                assertOrto(v, n)
+                a += 0.1
+            }
+
+            r *= 5
+        }
+    }
 
 }
