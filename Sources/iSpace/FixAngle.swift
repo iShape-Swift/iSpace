@@ -7,6 +7,40 @@
 
 public typealias FixAngle = FixFloat
 
+public struct RotationMatrix {
+    
+    public let sin: FixFloat
+    public let cos: FixFloat
+    
+    @inlinable
+    public init(sin: FixFloat, cos: FixFloat) {
+        self.sin = sin
+        self.cos = cos
+    }
+    
+    @inlinable
+    public func rotateForward(point p: FixVec) -> FixVec {
+        if sin == 0 {
+            return p
+        } else {
+            let x = cos.mul(p.x) - sin.mul(p.y)
+            let y = sin.mul(p.x) + cos.mul(p.y)
+            return FixVec(x, y)
+        }
+    }
+
+    @inlinable
+    public func rotateBack(point p: FixVec) -> FixVec {
+        if sin == 0 {
+            return p
+        } else {
+            let x = cos.mul(p.x) + sin.mul(p.y)
+            let y = -sin.mul(p.x) + cos.mul(p.y)
+            return FixVec(x, y)
+        }
+    }
+}
+
 
 // split 90C to 128
 public extension FixAngle {
@@ -54,7 +88,7 @@ public extension FixAngle {
     var cos: FixFloat {
         let quarter = (self & FixAngle.fullRoundMask) >> 8
         let index = Int(self & FixAngle.indexMask)
-
+        
         switch quarter {
         case 0:
             return FixAngle.value(256 - index)
@@ -65,6 +99,32 @@ public extension FixAngle {
         default:
             return FixAngle.value(index)
         }
+    }
+    
+    @inlinable
+    var rotator: RotationMatrix {
+        let quarter = (self & FixAngle.fullRoundMask) >> 8
+        let index = Int(self & FixAngle.indexMask)
+
+        let sn: FixFloat
+        let cs: FixFloat
+        
+        switch quarter {
+        case 0:
+            sn = FixAngle.value(index)
+            cs = FixAngle.value(256 - index)
+        case 1:
+            sn = FixAngle.value(256 - index)
+            cs = -FixAngle.value(index)
+        case 2:
+            sn = -FixAngle.value(index)
+            cs = -FixAngle.value(256 - index)
+        default:
+            sn = -FixAngle.value(256 - index)
+            cs = FixAngle.value(index)
+        }
+        
+        return RotationMatrix(sin: sn, cos: cs)
     }
 
     static func value(_ index: Int) -> FixFloat {

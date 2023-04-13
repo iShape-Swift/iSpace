@@ -23,7 +23,7 @@ public struct FixVec {
     }
      
     @inlinable
-    public init(_ x: Int64, _ y: Int64) {
+    public init(_ x: FixFloat, _ y: FixFloat) {
         self.x = x
         self.y = y
  #if DEBUG
@@ -62,6 +62,11 @@ public struct FixVec {
     }
     
     @inlinable
+    public var half: FixVec {
+        FixVec(x >> 1, y >> 1)
+    }
+    
+    @inlinable
     public func ortho(clockwise: Bool) -> FixVec {
         if clockwise {
             return FixVec(y, -x).normalize
@@ -70,6 +75,11 @@ public struct FixVec {
         }
     }
      
+    @inlinable
+    public func divTwo(_ count: Int) -> FixVec {
+        FixVec(x >> count, y >> count)
+    }
+    
     @inlinable
     public static func +(left: FixVec, right: FixVec) -> FixVec {
         FixVec(left.x + right.x, left.y + right.y)
@@ -106,6 +116,14 @@ public struct FixVec {
         let dy = y - v.y
         
         return dx.sqr + dy.sqr
+    }
+    
+    @inlinable
+    public func middle(_ v: FixVec) -> FixVec {
+        let x = (x + v.x) >> 1
+        let y = (y + v.y) >> 1
+        
+        return FixVec(x, y)
     }
 }
 

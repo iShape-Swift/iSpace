@@ -11,9 +11,11 @@ public extension FixFloat {
     
     static let fractionBits: Int64 = 10
     static let maxBits = (Int64.bitWidth >> 1) - 1
-    static let max: Int64 = Int64(1) << maxBits
+    static let max: Int64 = (Int64(1) << (maxBits + 1)) - 1
+    static let min: Int64 = -max
     
     static let unit: Int64 = 1 << fractionBits
+    static let half: Int64 = 1 << (fractionBits - 1)
     
     static let pi: FixFloat = 3217
     
@@ -45,6 +47,11 @@ public extension FixFloat {
     @inlinable
     var float: Float {
         Float(self) / Float(Int64.unit)
+    }
+    
+    @inlinable
+    static func unit(_ value: Int64) -> FixFloat {
+        value << FixFloat.fractionBits
     }
 
 }
