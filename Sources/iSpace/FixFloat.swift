@@ -48,6 +48,11 @@ public extension FixFloat {
     var float: Float {
         Float(self) / Float(Int64.unit)
     }
+
+    @inlinable
+    var int: Int {
+        Int(self >> FixFloat.fractionBits)
+    }
     
     @inlinable
     static func unit(_ value: Int64) -> FixFloat {

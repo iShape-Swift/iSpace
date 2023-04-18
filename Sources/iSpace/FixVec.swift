@@ -5,12 +5,22 @@
 //  Created by Nail Sharipov on 03.04.2023.
 //
 
+import simd
+
+FixVec
+
 public struct FixVec {
 
     public static let zero = FixVec(0, 0)
     
-    public let x: FixFloat
-    public let y: FixFloat
+    @usableFromInline
+    let vec: SIMD2<Int64>
+    
+    @inlinable
+    public var x: FixFloat { vec.x }
+    
+    @inlinable
+    public var y: FixFloat { vec.y }
 
     #if DEBUG
     public let deb_x: Float
@@ -24,8 +34,7 @@ public struct FixVec {
      
     @inlinable
     public init(_ x: FixFloat, _ y: FixFloat) {
-        self.x = x
-        self.y = y
+        vec = .init(x: x, y: y)
  #if DEBUG
         deb_x = Float(x) / Float(FixFloat.unit)
         deb_y = Float(y) / Float(FixFloat.unit)
