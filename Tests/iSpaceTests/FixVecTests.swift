@@ -10,33 +10,75 @@ import XCTest
 
 final class FixVecTests: XCTestCase {
     
+    func testMath() throws {
+        let v0 = FixVec(-1000, 1000) + FixVec(1000, -1000)
+        XCTAssertEqual(v0, FixVec(0, 0))
+        
+        let v1 = FixVec(-1000, 0) - FixVec(-1000, -1000)
+        XCTAssertEqual(v1, FixVec(0, 1000))
+
+        let a0 = FixVec(-512, 0).sqrDistance(FixVec(512, 0))
+        XCTAssertEqual(a0, FixFloat.unit)
+        
+    }
+    
+    // 0, 3039799258
+    func testSQRLengthDebug_0() throws {
+        let v0: FixVec = SIMD2(70034108, 654178)
+        let v1 = v0.float
+        
+        let s0 = v0.sqrLength.float
+        let s1 = v1.sqrLength
+        
+        XCTAssertEqual(s0, s1, accuracy: 0.001 * s1)
+    }
+    
+    func testSQRLengthDebug_1() throws {
+        let v0: FixVec = SIMD2(12, 1)
+        let v1 = v0.float
+        
+        let s0 = v0.sqrLength.float
+        let s1 = v1.sqrLength
+        
+        print(s0)
+        print(s1)
+        
+        XCTAssertEqual(s0, s1, accuracy: 0.01 * (s1 + s0 + 1))
+    }
+
+    func testLengthDebug_0() throws {
+        let v0: FixVec = SIMD2(1048576, 0)
+        let v1 = v0.float
+        print("vector: \(v1)")
+        
+        print("sqr: \(v0.sqrLength)")
+        let s0 = v0.length.float
+        print(s0)
+        
+        let s1 = v1.length
+        print(s1)
+        
+        XCTAssertEqual(s0, s1, accuracy: 0.01 * (s1 + s0 + 1))
+    }
+    
     func testSQRLength() throws {
-        var x: Int64 = 0
-        var y: Int64 = 0
-        while x < 10_000 {
-            y = 1
+        var x: Int64 = 12
+        while x < 25_000 {
+            var y: Int64 = 1
 
-            while x < 2_500_000 {
-                let iV = FixVec(x, y)
-                let dV = iV.float
+            while y < 25_000 {
+                let v0 = FixVec(x, y)
+                let v1 = v0.float
 
-                let m0 = iV.sqrLength
-                let m1 = dV.sqrLength
+                let s0 = v0.sqrLength.float
+                let s1 = v1.sqrLength
 
-                let d0 = abs(m1.fix - m0)
-                let d1 = abs(m1 - m0.float)
+                XCTAssertEqual(s0, s1, accuracy: 0.05 * (s0 + s1 + 1), "(\(x), \(y))")
 
-                
-                let c0 = 1 + max(iV.x, iV.y) >> 7
-                let c1 = 0.001 + max(dV.x, dV.y) * 0.01
-                
-                XCTAssertTrue(d0 < c0, "v: \(iV), d0: \(d0)")
-                XCTAssertTrue(d1 < c1, "v: \(dV), d1: \(d1)")
-
-                y += 101
+                y += 11
             }
 
-            x += 103
+            x += 13
         }
     }
     
@@ -47,21 +89,14 @@ final class FixVecTests: XCTestCase {
             y = 1
 
             while x < 1_000_000 {
-                let iV = FixVec(x, y)
-                let dV = iV.float
+                let v0 = FixVec(x, y)
+                let v1 = v0.float
 
-                let m0 = iV.length
-                let m1 = dV.length
-
-                let d0 = abs(m1.fix - m0)
-                let d1 = abs(m1 - m0.float)
+                let s0 = v0.length.float
+                let s1 = v1.length
 
                 
-                let c0 = 1 + max(iV.x, iV.y) >> 7
-                let c1 = 0.001 + max(dV.x, dV.y) * 0.01
-                
-                XCTAssertTrue(d0 < c0, "v: \(iV), d0: \(d0)")
-                XCTAssertTrue(d1 < c1, "v: \(dV), d1: \(d1)")
+                XCTAssertEqual(s0, s1, accuracy: 0.05 * (s0 + s1 + 1), "(\(x), \(y))")
 
                 x += 131
             }

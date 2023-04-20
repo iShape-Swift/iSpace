@@ -41,12 +41,12 @@ public extension FixFloat {
     
     @inlinable
     var double: Double {
-        Double(self) / Double(Int64.unit)
+        Double(self) / Double(FixFloat.unit)
     }
     
     @inlinable
     var float: Float {
-        Float(self) / Float(Int64.unit)
+        Float(self) / Float(FixFloat.unit)
     }
 
     @inlinable

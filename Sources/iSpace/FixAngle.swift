@@ -20,22 +20,25 @@ public struct RotationMatrix {
     
     @inlinable
     public func rotateForward(point p: FixVec) -> FixVec {
-        if sin == 0 {
+        if sin == 0 && cos == 1024 {
             return p
         } else {
-            let x = cos.mul(p.x) - sin.mul(p.y)
-            let y = sin.mul(p.x) + cos.mul(p.y)
+            let v = FixVec(sin, cos)
+            let x = -v.crossProduct(p)  // -v.x(sin) * p.y + v.y(cos) * p.x
+            let y = v.dotProduct(p)     // v.x(sin) * p.x + v.y(cos) * p.y
             return FixVec(x, y)
         }
     }
 
     @inlinable
     public func rotateBack(point p: FixVec) -> FixVec {
-        if sin == 0 {
+        if sin == 0 && cos == 1024 {
             return p
         } else {
-            let x = cos.mul(p.x) + sin.mul(p.y)
-            let y = -sin.mul(p.x) + cos.mul(p.y)
+            let v = FixVec(cos, sin)
+            let x = v.dotProduct(p)     // v.x(cos) * p.x + v.y(sin) * p.y
+            let y = v.crossProduct(p)   // v.x(cos) * p.y - v.y(sin) * p.x
+
             return FixVec(x, y)
         }
     }

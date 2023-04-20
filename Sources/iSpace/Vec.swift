@@ -9,6 +9,18 @@ import simd
 
 public typealias Vec = simd_float2
 
+public struct VecMirror {
+    
+    public let vec: Vec
+    public let isOpposite: Bool
+    
+    @usableFromInline
+    init(vec: Vec, isOpposite: Bool) {
+        self.vec = vec
+        self.isOpposite = isOpposite
+    }
+}
+
 public extension Vec {
     
     static let zero = Vec(0, 0)
@@ -65,6 +77,21 @@ public extension Vec {
         } else {
             return Vec(-y, x).normalize
         }
+    }
+    
+    @inlinable
+    func mirror(_ a: Vec) -> VecMirror {
+        let b = Vec(a.y, -a.x)
+        
+        let da = self.dotProduct(a)
+        let db = self.dotProduct(b)
+        
+        let va = a * da
+        let vb = b * db
+
+        let isOpposite = da < 0
+
+        return VecMirror(vec: vb - va, isOpposite: isOpposite)
     }
 }
 

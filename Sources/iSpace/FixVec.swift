@@ -7,38 +7,32 @@
 
 import simd
 
-FixVec
+public typealias FixVec = SIMD2<Int64>
 
-public struct FixVec {
-
-    public static let zero = FixVec(0, 0)
+public struct FixVecMirror {
+    
+    public let vec: FixVec
+    public let isOpposite: Bool
     
     @usableFromInline
-    let vec: SIMD2<Int64>
-    
-    @inlinable
-    public var x: FixFloat { vec.x }
-    
-    @inlinable
-    public var y: FixFloat { vec.y }
+    init(vec: FixVec, isOpposite: Bool) {
+        self.vec = vec
+        self.isOpposite = isOpposite
+    }
+}
 
-    #if DEBUG
-    public let deb_x: Float
-    public let deb_y: Float
-    #endif
-     
+public extension FixVec {
+
+    static let zero = FixVec(0, 0)
+    
     @inlinable
-    public var bitPack: Int64 {
+    var bitPack: Int64 {
         (x << FixFloat.maxBits) + y
     }
      
     @inlinable
-    public init(_ x: FixFloat, _ y: FixFloat) {
-        vec = .init(x: x, y: y)
- #if DEBUG
-        deb_x = Float(x) / Float(FixFloat.unit)
-        deb_y = Float(y) / Float(FixFloat.unit)
- #endif
+    init(_ x: FixFloat, _ y: FixFloat) {
+        self = .init(x: x, y: y)
     }
     
     @inlinable
@@ -52,31 +46,30 @@ public struct FixVec {
     }
 
     @inlinable
-    public var sqrLength: FixFloat {
-        (x * x + y * y) >> FixFloat.fractionBits
+    var sqrLength: FixFloat {
+        let m = self &* self
+        return (m.x + m.y) >> FixFloat.fractionBits
     }
     
     @inlinable
-    public var length: FixFloat {
-        (x * x + y * y).squareRootBinarySearch
+    var length: FixFloat {
+        let m = self &* self
+        return (m.x + m.y).squareRootBinarySearch
     }
 
     @inlinable
-    public var normalize: FixVec {
+    var normalize: FixVec {
         let s = (1 << 30) / length
-        let nx = (s * x) >> 20
-        let ny = (s * y) >> 20
-        
-        return FixVec(nx, ny)
+        return (s &* self) &>> 20
     }
     
     @inlinable
-    public var half: FixVec {
-        FixVec(x >> 1, y >> 1)
+    var half: FixVec {
+        self &>> 1
     }
     
     @inlinable
-    public func ortho(clockwise: Bool) -> FixVec {
+    func ortho(clockwise: Bool) -> FixVec {
         if clockwise {
             return FixVec(y, -x).normalize
         } else {
@@ -85,64 +78,64 @@ public struct FixVec {
     }
      
     @inlinable
-    public func divTwo(_ count: Int) -> FixVec {
-        FixVec(x >> count, y >> count)
+    func divTwo(_ count: Int64) -> FixVec {
+        self &>> count
     }
     
     @inlinable
-    public static func +(left: FixVec, right: FixVec) -> FixVec {
-        FixVec(left.x + right.x, left.y + right.y)
+    static func +(left: FixVec, right: FixVec) -> FixVec {
+        left &+ right
     }
 
     @inlinable
-    public static func -(left: FixVec, right: FixVec) -> FixVec {
-        FixVec(left.x - right.x, left.y - right.y)
+    static func -(left: FixVec, right: FixVec) -> FixVec {
+        left &- right
     }
     
     @inlinable
-    public static func *(left: FixVec, right: FixFloat) -> FixVec {
-        FixVec(left.x.mul(right), left.y.mul(right))
+    static func *(left: FixVec, right: FixFloat) -> FixVec {
+        (right &* left) &>> FixFloat.fractionBits
     }
     
     @inlinable
-    public static func *(left: FixFloat, right: FixVec) -> FixVec {
-        FixVec(right.x.mul(left), right.y.mul(left))
+    static func *(left: FixFloat, right: FixVec) -> FixVec {
+        (left &* right) &>> FixFloat.fractionBits
     }
 
     @inlinable
-    public func dotProduct(_ v: FixVec) -> FixFloat { // dot product (cos)
-        x.mul(v.x) + v.y.mul(y)
+    func dotProduct(_ v: FixVec) -> FixFloat { // dot product (cos)
+        let m = (self &* v) &>> FixFloat.fractionBits
+        return m.x + m.y
     }
 
     @inlinable
-    public func crossProduct(_ v: FixVec) -> FixFloat { // cross product
-        x.mul(v.y) - y.mul(v.x)
+    func crossProduct(_ v: FixVec) -> FixFloat { // cross product
+        let m = (self &* FixVec(v.y, v.x)) &>> FixFloat.fractionBits
+        return m.x - m.y
     }
     
     @inlinable
-    public func sqrDistance(_ v: FixVec) -> FixFloat {
-        let dx = x - v.x
-        let dy = y - v.y
+    func sqrDistance(_ v: FixVec) -> FixFloat {
+        (self &- v).sqrLength
+    }
+    
+    @inlinable
+    func middle(_ v: FixVec) -> FixVec {
+        (self &+ v) &>> 1
+    }
+    
+    @inlinable
+    func mirror(_ a: FixVec) -> FixVecMirror {
+        let b = FixVec(a.y, -a.x)
         
-        return dx.sqr + dy.sqr
-    }
-    
-    @inlinable
-    public func middle(_ v: FixVec) -> FixVec {
-        let x = (x + v.x) >> 1
-        let y = (y + v.y) >> 1
+        let da = self.dotProduct(a)
+        let db = self.dotProduct(b)
         
-        return FixVec(x, y)
-    }
-}
+        let va = a * da
+        let vb = b * db
 
-extension FixVec: Equatable {
-
-    @inlinable
-    public static func == (lhs: FixVec, rhs: FixVec) -> Bool {
-        lhs.x == rhs.x && lhs.y == rhs.y
+        return FixVecMirror(vec: vb - va, isOpposite: da < 0)
     }
-    
 }
 
 public extension Array where Element == FixVec {
