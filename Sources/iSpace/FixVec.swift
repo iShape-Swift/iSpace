@@ -54,7 +54,7 @@ public extension FixVec {
     @inlinable
     var length: FixFloat {
         let m = self &* self
-        return (m.x + m.y).squareRootBinarySearch
+        return (m.x + m.y).fastSquareRoot
     }
 
     @inlinable

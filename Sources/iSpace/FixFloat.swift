@@ -36,7 +36,7 @@ public extension FixFloat {
     
     @inlinable
     var sqrt: FixFloat {
-        (self << FixFloat.fractionBits).squareRootBinarySearch
+        (self << FixFloat.fractionBits).fastSquareRoot
     }
     
     @inlinable

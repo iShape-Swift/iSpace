@@ -59,7 +59,6 @@ public extension FixAngle {
     static let doubleToRadian: Double = Double.pi / 512
     static let floatToAngle: Float = 1024 * 512 / Float.pi
 
-    
     @inlinable
     var radian: Double {
         Double(self.trim) * Int64.doubleToRadian
@@ -138,7 +137,7 @@ public extension FixAngle {
             return map[i]
         }
     }
-    
+
 }
 
 public extension Double {
